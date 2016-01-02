@@ -1,0 +1,12 @@
+# generate Ruby bindings
+# call in Router directory this way:
+# ruby gen_bindings
+
+cd ..
+for i in RAPOLLONIUS RCGAL RTREE_2D_POINT RTREE_2D_RECT RBOOST/Fibonacci_Queue_Hash RBOOST/Fibonacci_Queue; do
+  cd $i
+  ruby extconf.rb
+	make
+	cd -
+done
+

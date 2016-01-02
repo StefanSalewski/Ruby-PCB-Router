@@ -1,0 +1,15 @@
+
+#cd old_pics
+#for i in `seq 1 1000`;
+#	do
+#	ruby router.rb $i
+#done 
+#cd -
+cd new_pics
+for i in `seq 100 200`;
+	do
+	ruby router.rb $i
+done 
+cd -
+diff --exclude=router.rb* new_pics/ old_pics/
+

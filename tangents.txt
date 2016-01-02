@@ -1,0 +1,94 @@
+http://en.wikipedia.org/wiki/Tangent_lines_to_circles
+https://en.wikibooks.org/wiki/Algorithm_Implementation/Geometry/Tangents_between_two_circles
+import java.util.Arrays;
+ 
+public class CircleTangents {
+    /**
+     *  Finds tangent segments between two given circles.
+     *
+     *  Returns an empty, or 2x4, or 4x4 array of doubles representing
+     *  the two exterior and two interior tangent segments (in that order).
+     *  If some tangents don't exist, they aren't present in the output.
+     *  Each segment is represent by a 4-tuple x1,y1,x2,y2.
+     * 
+     *  Exterior tangents exist iff one of the circles doesn't contain
+     *  the other. Interior tangents exist iff circles don't intersect.
+     *
+     *  In the limiting case when circles touch from outside/inside, there are
+     *  no interior/exterior tangents, respectively, but just one common
+     *  tangent line (which isn't returned at all, or returned as two very
+     *  close or equal points by this code, depending on roundoff -- sorry!)
+     *
+     *  Java 6 (1.6) required, for Arrays.copyOf()
+     */
+    public static double[][] getTangents(double x1, double y1, double r1, double x2, double y2, double r2) {
+        double d_sq = (x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2);
+        if (d_sq <= (r1-r2)*(r1-r2)) return new double[0][4];
+ 
+        double d = Math.sqrt(d_sq);
+        double vx = (x2 - x1) / d;
+        double vy = (y2 - y1) / d;
+ 
+        double[][] res = new double[4][4];
+        int i = 0;
+ 
+        // Let A, B be the centers, and C, D be points at which the tangent
+        // touches first and second circle, and n be the normal vector to it.
+        //
+        // We have the system:
+        //   n * n = 1          (n is a unit vector)          
+        //   C = A + r1 * n
+        //   D = B +/- r2 * n
+        //   n * CD = 0         (common orthogonality)
+        //
+        // n * CD = n * (AB +/- r2*n - r1*n) = AB*n - (r1 -/+ r2) = 0,  <=>
+        // AB * n = (r1 -/+ r2), <=>
+        // v * n = (r1 -/+ r2) / d,  where v = AB/|AB| = AB/d
+        // This is a linear equation in unknown vector n.
+ 
+        for (int sign1 = +1; sign1 >= -1; sign1 -= 2) {
+            double c = (r1 - sign1 * r2) / d;
+ 
+            // Now we're just intersecting a line with a circle: v*n=c, n*n=1
+
+# So we have to solve these two equations for nx, ny:
+# vx*nx+vy*ny=c
+# nx^2+ny^2=1
+# -
+# vx*nx-c=-vy*ny
+# ny^2=1-nx^2
+# -
+# vx^2*nx^2-2*vx*nx*c+c^2=vy^2*ny^2=vy^2*(1-nx^2)
+# nx^2*(vx^2+vy^2)-2*vx*c*nx+c^2-vy^2=0
+# nx_1,2=(2*vx*c +- sqrt(4*vx^2*c^2-4*(vx^2+vy^2)*(c^2-vy^2)))/(2*(vx^2+vy^2)) # vx^2+vy^2 = 1
+#       =(2*vx*c +- sqrt(4*vx^2*c^2-4*vx^2*c^2+4*vx^2*vy^2-4*vy^2*c^2+4*vy^4))/2
+#       =(2*vx*c +- sqrt(4*vx^2*vy^2-4*vy^2*c^2+4*vy^4))/2
+#       =(2*vx*c +- sqrt(4*vy^2*(vx^2-c^2+vy^2)))/2
+#       =(2*vx*c +- 2*vy*sqrt(vx^2-c^2+vy^2))/2 # vx^2+vy^2 = 1
+#       =vx*c +- vy*sqrt(1-c^2)
+# -
+# ny=(c-vx*nx)/vy
+#   =(c-vx*(vx*c +- vy*sqrt(1-c^2)))/vy
+#   =(c-vx^2*c -+ vx*vy*sqrt(1-c^2))/vy
+# 	=c*(1-vx^2)/vy -+ vx*sqrt(1-c^2)
+# 	=c*(vy^2)/vy -+ vx*sqrt(1-c^2)
+# 	=c*vy -+ vx*sqrt(1-c^2)
+
+            if (c*c > 1.0) continue;
+            double h = Math.sqrt(Math.max(0.0, 1.0 - c*c));
+ 
+            for (int sign2 = +1; sign2 >= -1; sign2 -= 2) {
+                double nx = vx * c - sign2 * h * vy;
+                double ny = vy * c + sign2 * h * vx;
+ 
+                double[] a = res[i++];
+                a[0] = x1 + r1 * nx;
+                a[1] = y1 + r1 * ny;
+                a[2] = x2 + sign1 * r2 * nx;
+                a[3] = y2 + sign1 * r2 * ny;
+            }
+        }
+ 
+        return Arrays.copyOf(res, i);
+    }
+}

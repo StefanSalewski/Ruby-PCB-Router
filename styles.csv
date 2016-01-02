@@ -1,0 +1,6 @@
+name,trace_width_mil,trace_clearance_mil,via_diameter_mm,via_clearance_mil,via_mask_diameter_m,via_drill_diameter_mm,color
+default,10,10,0.4,10,0,0.2,white
+AGND,20,10,0.5,10,0,0.3,white
+DGND,20,10,0.5,10,0,0.3,white
+GND,20,10,0.5,10,0,0.3,white
+power,20,10,0.5,10,0,0.3,white
